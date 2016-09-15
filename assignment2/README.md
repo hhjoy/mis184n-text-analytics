@@ -4,7 +4,7 @@
 The data for this assignment is the Yelp Restaurant Review Data. 
 This Yelp dataset has information on restaurants (e.g., type of food, price range, etc.) as well as reviews written by patrons. The output variable is the star rating (1-5). It will be best to convert this rating to high (say, ratings of 4 & 5) and low (1, 2, 3). 
 
-## Task A. Ignore the text (reviews) and run a classification model with the numeric data (you can use standard methods like logistic regression, k-nearest neighbors or anything else). What is the best accuracy of your model?
+### Task A. Ignore the text (reviews) and run a classification model with the numeric data (you can use standard methods like logistic regression, k-nearest neighbors or anything else). What is the best accuracy of your model?
 
 Logistic Regression and KNN performed similarly with test accuracies of 69.5%.
 
@@ -72,7 +72,7 @@ def confusion_matrix(predicted, actual):
 	print "\nProportion Table\n", pd.crosstab(index=actual,columns=predicted).apply(lambda r: r/r.sum(), axis=1)
 ```
 
-###Logistic Regression
+####Logistic Regression
 
 ```python
 logistic_model = LogisticRegression()
@@ -120,7 +120,7 @@ confusion_matrix(logistic_test_prediction, test_y) # print test accuracy
     1      0.015067  0.984933
     
 
-###KNN
+####KNN
 
 ```python
 train_accuracies = {}
@@ -179,11 +179,11 @@ train_accuracies[25]
 
 
 
-##Task B. Perform a supervised classification on a subset of the corpus using the reviews only. You can write your code in Python or R. What accuracy do you get from this text mining exercise?
+###Task B. Perform a supervised classification on a subset of the corpus using the reviews only. You can write your code in Python or R. What accuracy do you get from this text mining exercise?
 
 Running Naive Bayes on a random sample of the text data gave us a test accuracy of 68.87%. Seeing that our data is highly imbalanced, we tried undersampling the dataset to ensure a 50/50 split of the classes. This increased accuracy to 80%. Looking at the confusion matrices, we can see that undersampling made the model better at predicting 0's.
 
-###Random Sampling
+####Random Sampling
 
 ```python
 np.random.seed(1234567)
@@ -251,7 +251,7 @@ text_classification()
     1      0.000741  0.999259
     
 
-###Undersampling data set to ensure 50/50 split
+####Undersampling data set to ensure 50/50 split
 
 ```python
 yelp['High'].value_counts() # imbalanced data set
@@ -322,7 +322,7 @@ text_classification()
     1      0.223983  0.776017
     
 
-##Task C. Combine the numeric data and the text classification model (in task B) to create a “hybrid” model. It is your task to figure out how to do this. Now run this hybrid classification model and compare the results with those in A and B. 
+###Task C. Combine the numeric data and the text classification model (in task B) to create a “hybrid” model. It is your task to figure out how to do this. Now run this hybrid classification model and compare the results with those in A and B. 
 
 The test accuracy of the hybrid model is 79%, better than the non-text model (69%), but slightly worse than the text model (80%). The hybrid model does a little better than the text model at predicting 1's. 
 
@@ -381,7 +381,7 @@ confusion_matrix(test_prediction, test_y)
     1      0.202853  0.797147
     
 
-## Task D. Use unsupervised sentiment analysis on the reviews (with SentiStrength or any other tool) and use the sentiment score to predict high/low rating. Compare and contrast the results of tasks B and D. What can you conclude from your analysis?
+### Task D. Use unsupervised sentiment analysis on the reviews (with SentiStrength or any other tool) and use the sentiment score to predict high/low rating. Compare and contrast the results of tasks B and D. What can you conclude from your analysis?
 
 The results were poor. The accuracy was 58.47%, which is just slightly better than random guessing. Unsupervised sentiment analysis by itself does not seem to be a good way to predict rating.
 
@@ -425,7 +425,7 @@ confusion_matrix(sentiment['Predicted'], sentiment['Actual'])
     1          0.310877  0.689123
     
 
-## Task E. Use unsupervised clustering on the text. Does clustering achieve “good” separation between high and low rated restaurants? How can you explain the result?
+### Task E. Use unsupervised clustering on the text. Does clustering achieve “good” separation between high and low rated restaurants? How can you explain the result?
 
 Unsupervised clustering did better than unsupervised sentiment analysis with an accuracy of 60%. This makes sense because we used the document term matrix and the type of words people use can be indicative of what they think about the restaurant. Sentiment, on the other hand, can be difficult to gauge.
 
@@ -462,7 +462,7 @@ confusion_matrix(yelp['Cluster_Predicted'], yelp['High'])
     1                  0.377038  0.622962
     
 
-## Task F. What are the top 5 “attributes” of a restaurant that are associated with (i) high and (ii) low ratings?
+### Task F. What are the top 5 “attributes” of a restaurant that are associated with (i) high and (ii) low ratings?
 
 Below we find the top 5 attributes/nouns associated with restaurants with high and low ratings. The attributes discussed are fairly similar regardless of whether it is a high or low rating and consist of things like the 'food', 'place', 'service', and 'restaurant'. It is the words used to describe these nouns that differ. Following what we did in assignment 1, we decided to use log probability ratios to find words that are likely to be found in one class but not the other. Words like 'gem', 'amazing', 'perfect', 'windsor', and 'fantastic' described attributes of restaurants with high ratings and words like 'worse', 'mediocre', 'tasteless', 'worst', and 'terrible' described attributes of restaurants with low ratings.
 
