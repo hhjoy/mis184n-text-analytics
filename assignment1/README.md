@@ -28,7 +28,6 @@ from nltk.data import load
 import random
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.feature_extraction.text import TfidfVectorizer
-from operator import itemgetter
 import math
 ```
 

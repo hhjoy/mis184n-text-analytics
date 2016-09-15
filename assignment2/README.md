@@ -8,30 +8,31 @@ This Yelp dataset has information on restaurants (e.g., type of food, price rang
 
 Logistic Regression and KNN performed similarly with test accuracies of 69.5%.
 
-
-    import pandas as pd
-    import numpy as np
-    from pandas import Series
-    from pandas import DataFrame
-    from patsy import dmatrices
-    from sklearn.cross_validation import train_test_split,StratifiedShuffleSplit,StratifiedKFold
-    from sklearn.linear_model import LogisticRegression
-    from sklearn import metrics
-    from sklearn import neighbors
-    import random
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.naive_bayes import MultinomialNB
-    import scipy.sparse
-    import matplotlib.pyplot as plt
-    %pylab inline
-    import operator
-    import sklearn.cluster
-    from nltk import word_tokenize
-    from nltk import pos_tag
-    from nltk.corpus import stopwords
-    import itertools
-    import nltk
-    from operator import itemgetter
+```python
+import pandas as pd
+import numpy as np
+from pandas import Series
+from pandas import DataFrame
+from patsy import dmatrices
+from sklearn.cross_validation import train_test_split,StratifiedShuffleSplit,StratifiedKFold
+from sklearn.linear_model import LogisticRegression
+from sklearn import metrics
+from sklearn import neighbors
+import random
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+import scipy.sparse
+import matplotlib.pyplot as plt
+%pylab inline
+import operator
+import sklearn.cluster
+from nltk import word_tokenize
+from nltk import pos_tag
+from nltk.corpus import stopwords
+import itertools
+import nltk
+from operator import itemgetter
+```
 
     Populating the interactive namespace from numpy and matplotlib
     
@@ -40,41 +41,47 @@ Logistic Regression and KNN performed similarly with test accuracies of 69.5%.
     `%matplotlib` prevents importing * from pylab and numpy
     
 
+```python
+yelp = pd.read_csv("Yelp Data Restaurant Reviews Ratings.csv")
+```
 
-    yelp = pd.read_csv("Yelp Data Restaurant Reviews Ratings.csv")
+```python
+# create output variable 'high'
+high_mask = yelp['stars'] > 3
+yelp['High'] = 0
+yelp.ix[high_mask, 'High'] = 1
+```
 
+```python
+train = yelp.sample(int(0.7*len(yelp)),replace=False).copy()
+test = yelp[~yelp.index.isin(train.index.values)].copy()
+```
 
-    # create output variable 'high'
-    high_mask = yelp['stars'] > 3
-    yelp['High'] = 0
-    yelp.ix[high_mask, 'High'] = 1
+```python
+train_x = train.drop(["stars","Review","High"], axis=1).copy()
+train_y = train['High']
+test_x = test.drop(["stars","Review","High"], axis=1).copy()
+test_y = test['High']
+```
 
-
-    train = yelp.sample(int(0.7*len(yelp)),replace=False).copy()
-    test = yelp[~yelp.index.isin(train.index.values)].copy()
-
-
-    train_x = train.drop(["stars","Review","High"], axis=1).copy()
-    train_y = train['High']
-    test_x = test.drop(["stars","Review","High"], axis=1).copy()
-    test_y = test['High']
-
-
-    # function for accuracy and confusion matrix output
-    def confusion_matrix(predicted, actual):
-        print "Percent Correct\n", round((predicted==actual).mean()*100, 3)
-        print "\nConfusion Matrix\n", pd.crosstab(index=actual,columns=predicted)
-        print "\nProportion Table\n", pd.crosstab(index=actual,columns=predicted).apply(lambda r: r/r.sum(), axis=1)
+```python
+# function for accuracy and confusion matrix output
+def confusion_matrix(predicted, actual):
+	print "Percent Correct\n", round((predicted==actual).mean()*100, 3)
+	print "\nConfusion Matrix\n", pd.crosstab(index=actual,columns=predicted)
+	print "\nProportion Table\n", pd.crosstab(index=actual,columns=predicted).apply(lambda r: r/r.sum(), axis=1)
+```
 
 ###Logistic Regression
 
+```python
+logistic_model = LogisticRegression()
+logistic_result = logistic_model.fit(train_x, train_y)
 
-    logistic_model = LogisticRegression()
-    logistic_result = logistic_model.fit(train_x, train_y)
 
-
-    logistic_train_prediction = logistic_model.predict(train_x)
-    confusion_matrix(logistic_train_prediction, train_y) # print training accuracy
+logistic_train_prediction = logistic_model.predict(train_x)
+confusion_matrix(logistic_train_prediction, train_y) # print training accuracy
+```
 
     Percent Correct
     67.891
@@ -92,9 +99,10 @@ Logistic Regression and KNN performed similarly with test accuracies of 69.5%.
     1      0.017694  0.982306
     
 
-
-    logistic_test_prediction = logistic_model.predict(test_x)
-    confusion_matrix(logistic_test_prediction, test_y) # print test accuracy
+```python
+logistic_test_prediction = logistic_model.predict(test_x)
+confusion_matrix(logistic_test_prediction, test_y) # print test accuracy
+```
 
     Percent Correct
     69.55
@@ -114,22 +122,22 @@ Logistic Regression and KNN performed similarly with test accuracies of 69.5%.
 
 ###KNN
 
+```python
+train_accuracies = {}
+test_accuracies = {}
 
-    train_accuracies = {}
-    test_accuracies = {}
-    
-    for i in range(1, 30, 1): # loop through different values of k
-        knn_model = neighbors.KNeighborsClassifier(n_neighbors=i, weights='uniform', p=2)
-        knn_result = knn_model.fit(train_x, train_y)
-        knn_train_prediction = knn_model.predict(train_x)
-        train_accuracies[i] = metrics.accuracy_score(train_y, knn_train_prediction)
-        knn_test_prediction = knn_model.predict(test_x)
-        test_accuracies[i] = metrics.accuracy_score(test_y, knn_test_prediction)
+for i in range(1, 30, 1): # loop through different values of k
+	knn_model = neighbors.KNeighborsClassifier(n_neighbors=i, weights='uniform', p=2)
+	knn_result = knn_model.fit(train_x, train_y)
+	knn_train_prediction = knn_model.predict(train_x)
+	train_accuracies[i] = metrics.accuracy_score(train_y, knn_train_prediction)
+	knn_test_prediction = knn_model.predict(test_x)
+	test_accuracies[i] = metrics.accuracy_score(test_y, knn_test_prediction)
 
 
-    plt.plot(train_accuracies.values(), marker="o", linestyle="--")
-    plt.plot(test_accuracies.values(), marker="o", linestyle="--")
-
+plt.plot(train_accuracies.values(), marker="o", linestyle="--")
+plt.plot(test_accuracies.values(), marker="o", linestyle="--")
+```
 
 
 
@@ -141,9 +149,9 @@ Logistic Regression and KNN performed similarly with test accuracies of 69.5%.
 ![png](assignment2_files/assignment2_16_1.png)
 
 
-
-    max(test_accuracies.iteritems(), key=operator.itemgetter(1))[0]
-
+```python
+max(test_accuracies.iteritems(), key=operator.itemgetter(1))[0]
+```
 
 
 
@@ -151,9 +159,9 @@ Logistic Regression and KNN performed similarly with test accuracies of 69.5%.
 
 
 
-
-    train_accuracies[25]
-
+```python
+train_accuracies[25]
+```
 
 
 
@@ -161,9 +169,9 @@ Logistic Regression and KNN performed similarly with test accuracies of 69.5%.
 
 
 
-
-    train_accuracies[25]
-
+```python
+train_accuracies[25]
+```
 
 
 
@@ -177,37 +185,37 @@ Running Naive Bayes on a random sample of the text data gave us a test accuracy 
 
 ###Random Sampling
 
-
-    np.random.seed(1234567)
-    train = yelp.sample(int(len(yelp)*0.7), replace=False)
-
-
-    test = yelp[~yelp.index.isin(train.index.values)]
+```python
+np.random.seed(1234567)
+train = yelp.sample(int(len(yelp)*0.7), replace=False)
 
 
-    train_x = train['Review']
-    train_y = train['High']
-    test_x = test['Review']
-    test_y = test['High']
+test = yelp[~yelp.index.isin(train.index.values)]
 
 
-    v = TfidfVectorizer(min_df=0,smooth_idf=True, strip_accents='unicode', norm='l2')
+train_x = train['Review']
+train_y = train['High']
+test_x = test['Review']
+test_y = test['High']
 
 
-    def text_classification():
-        x_train = v.fit_transform(train_x)
-        x_test = v.transform(test_x)
-        
-        nb_classifier = MultinomialNB().fit(x_train, train_y)
-        train_prediction = nb_classifier.predict(x_train)
-        test_prediction = nb_classifier.predict(x_test)
-        print("Train:")
-        confusion_matrix(train_prediction, train_y)
-        print("\nTest:")
-        confusion_matrix(test_prediction, test_y)
+v = TfidfVectorizer(min_df=0,smooth_idf=True, strip_accents='unicode', norm='l2')
 
 
-    text_classification()
+def text_classification():
+	x_train = v.fit_transform(train_x)
+	x_test = v.transform(test_x)
+	
+	nb_classifier = MultinomialNB().fit(x_train, train_y)
+	train_prediction = nb_classifier.predict(x_train)
+	test_prediction = nb_classifier.predict(x_test)
+	print("Train:")
+	confusion_matrix(train_prediction, train_y)
+	print("\nTest:")
+	confusion_matrix(test_prediction, test_y)
+```
+
+text_classification()
 
     Train:
     Percent Correct
@@ -244,9 +252,9 @@ Running Naive Bayes on a random sample of the text data gave us a test accuracy 
 
 ###Undersampling data set to ensure 50/50 split
 
-
-    yelp['High'].value_counts() # imbalanced data set
-
+```python
+yelp['High'].value_counts() # imbalanced data set
+```
 
 
 
@@ -256,28 +264,29 @@ Running Naive Bayes on a random sample of the text data gave us a test accuracy 
 
 
 
-
-    highs = yelp[yelp['High']==1]
-    lows = yelp[yelp['High']==0]
-
-
-    sample_high = highs.sample(len(lows),replace=False).copy()
+```python
+highs = yelp[yelp['High']==1]
+lows = yelp[yelp['High']==0]
 
 
-    sample = sample_high.append(lows, ignore_index=True)
+sample_high = highs.sample(len(lows),replace=False).copy()
 
 
-    train = sample.sample(int(0.7*len(sample)),replace=False).copy()
-    test = sample[~sample.index.isin(train.index.values)].copy()
+sample = sample_high.append(lows, ignore_index=True)
 
 
-    train_x = train['Review']
-    train_y = train['High']
-    test_x = test['Review']
-    test_y = test['High']
+train = sample.sample(int(0.7*len(sample)),replace=False).copy()
+test = sample[~sample.index.isin(train.index.values)].copy()
 
 
-    text_classification()
+train_x = train['Review']
+train_y = train['High']
+test_x = test['Review']
+test_y = test['High']
+
+
+text_classification()
+```
 
     Train:
     Percent Correct
@@ -316,26 +325,27 @@ Running Naive Bayes on a random sample of the text data gave us a test accuracy 
 
 The test accuracy of the hybrid model is 79%, better than the non-text model (69%), but slightly worse than the text model (80%). The hybrid model does a little better than the text model at predicting 1's. 
 
-
-    text_train = v.fit_transform(train_x) # just the reviews
-    numeric_train = train.drop(["Review", "stars", "High"], axis=1).copy()
-    numeric_sparse_train = scipy.sparse.csr_matrix(numeric_train.to_sparse())
-    combined_train = scipy.sparse.hstack([text_train, numeric_sparse_train]) # combining numeric and text
-
-
-    text_test = v.transform(test_x) # repeating above for test
-    numeric_test = test.drop(["Review", "stars", "High"], axis=1).copy()
-    numeric_sparse_test = scipy.sparse.csr_matrix(numeric_test.to_sparse())
-    combined_test = scipy.sparse.hstack([text_test, numeric_sparse_test])
+```python
+text_train = v.fit_transform(train_x) # just the reviews
+numeric_train = train.drop(["Review", "stars", "High"], axis=1).copy()
+numeric_sparse_train = scipy.sparse.csr_matrix(numeric_train.to_sparse())
+combined_train = scipy.sparse.hstack([text_train, numeric_sparse_train]) # combining numeric and text
 
 
-    nb_classifier = MultinomialNB().fit(combined_train, train_y)
-    train_prediction = nb_classifier.predict(combined_train)
-    test_prediction = nb_classifier.predict(combined_test)
-    print("Train:")
-    confusion_matrix(train_prediction, train_y)
-    print("\nTest:")
-    confusion_matrix(test_prediction, test_y)
+text_test = v.transform(test_x) # repeating above for test
+numeric_test = test.drop(["Review", "stars", "High"], axis=1).copy()
+numeric_sparse_test = scipy.sparse.csr_matrix(numeric_test.to_sparse())
+combined_test = scipy.sparse.hstack([text_test, numeric_sparse_test])
+
+
+nb_classifier = MultinomialNB().fit(combined_train, train_y)
+train_prediction = nb_classifier.predict(combined_train)
+test_prediction = nb_classifier.predict(combined_test)
+print("Train:")
+confusion_matrix(train_prediction, train_y)
+print("\nTest:")
+confusion_matrix(test_prediction, test_y)
+```
 
     Train:
     Percent Correct
@@ -374,28 +384,29 @@ The test accuracy of the hybrid model is 79%, better than the non-text model (69
 
 The results were poor. The accuracy was 58.47%, which is just slightly better than random guessing. Unsupervised sentiment analysis by itself does not seem to be a good way to predict rating.
 
-
-    sentiment = pd.read_excel("SentiStrength output.xlsx")
-
+```python
+sentiment = pd.read_excel("SentiStrength output.xlsx")
+```
     C:\Users\Julia Wu\Anaconda\lib\site-packages\xlrd\xlsx.py:246: PendingDeprecationWarning: This method will be removed in future versions.  Use 'tree.iter()' or 'list(tree.iter())' instead.
       for elem in self.tree.getiterator():
     C:\Users\Julia Wu\Anaconda\lib\site-packages\xlrd\xlsx.py:292: PendingDeprecationWarning: This method will be removed in future versions.  Use 'tree.iter()' or 'list(tree.iter())' instead.
       for elem in self.tree.getiterator():
     
 
-
-    sentiment['total_sent'] = sentiment['pos_sent'] + sentiment['neg_sent']
-
-
-    sentiment['Actual'] = yelp['High']
+```python
+sentiment['total_sent'] = sentiment['pos_sent'] + sentiment['neg_sent']
 
 
-    pos_sent_mask = sentiment['total_sent'] > 0
-    sentiment['Predicted'] = 0
-    sentiment.ix[pos_sent_mask, 'Predicted'] = 1
+sentiment['Actual'] = yelp['High']
 
 
-    confusion_matrix(sentiment['Predicted'], sentiment['Actual'])
+pos_sent_mask = sentiment['total_sent'] > 0
+sentiment['Predicted'] = 0
+sentiment.ix[pos_sent_mask, 'Predicted'] = 1
+
+
+confusion_matrix(sentiment['Predicted'], sentiment['Actual'])
+```
 
     Percent Correct
     58.471
@@ -417,21 +428,22 @@ The results were poor. The accuracy was 58.47%, which is just slightly better th
 
 Unsupervised clustering did better than unsupervised sentiment analysis with an accuracy of 60%. This makes sense because we used the document term matrix and the type of words people use can be indicative of what they think about the restaurant. Sentiment, on the other hand, can be difficult to gauge.
 
-
-    DTMReviews = v.fit_transform(yelp['Review'])
-
-
-    cluster = sklearn.cluster.KMeans(n_clusters=2, random_state=1)
-    cluster_out = cluster.fit(DTMReviews)
+```python
+DTMReviews = v.fit_transform(yelp['Review'])
 
 
-    cluster_out = Series(cluster_out.labels_)
+cluster = sklearn.cluster.KMeans(n_clusters=2, random_state=1)
+cluster_out = cluster.fit(DTMReviews)
 
 
-    yelp['Cluster_Predicted'] = cluster_out
+cluster_out = Series(cluster_out.labels_)
 
 
-    confusion_matrix(yelp['Cluster_Predicted'], yelp['High'])
+yelp['Cluster_Predicted'] = cluster_out
+
+
+confusion_matrix(yelp['Cluster_Predicted'], yelp['High'])
+```
 
     Percent Correct
     59.823
@@ -453,49 +465,49 @@ Unsupervised clustering did better than unsupervised sentiment analysis with an 
 
 Below we find the top 5 attributes/nouns associated with restaurants with high and low ratings. The attributes discussed are fairly similar regardless of whether it is a high or low rating and consist of things like the 'food', 'place', 'service', and 'restaurant'. It is the words used to describe these nouns that differ. Following what we did in assignment 1, we decided to use log probability ratios to find words that are likely to be found in one class but not the other. Words like 'gem', 'amazing', 'perfect', 'windsor', and 'fantastic' described attributes of restaurants with high ratings and words like 'worse', 'mediocre', 'tasteless', 'worst', and 'terrible' described attributes of restaurants with low ratings.
 
-
-    review_highs = highs['Review']
-    review_lows = lows['Review']
-
-
-    review_highs = review_highs.str.decode("utf-8")
-    review_lows = review_lows.str.decode("utf-8")
+```python
+review_highs = highs['Review']
+review_lows = lows['Review']
 
 
-    review_highs = review_highs.map(word_tokenize)
-    review_lows = review_lows.map(word_tokenize)
+review_highs = review_highs.str.decode("utf-8")
+review_lows = review_lows.str.decode("utf-8")
 
 
-    review_highs = list(review_highs)
-    review_lows = list(review_lows)
+review_highs = review_highs.map(word_tokenize)
+review_lows = review_lows.map(word_tokenize)
 
 
-    review_highs = list(itertools.chain.from_iterable(review_highs))
-    review_lows = list(itertools.chain.from_iterable(review_lows))
+review_highs = list(review_highs)
+review_lows = list(review_lows)
 
 
-    highs_lower = [word.lower() for word in review_highs if word.isalpha()]
-    lows_lower = [word.lower() for word in review_lows if word.isalpha()]
+review_highs = list(itertools.chain.from_iterable(review_highs))
+review_lows = list(itertools.chain.from_iterable(review_lows))
 
 
-    highs_vc = Series(highs_lower).value_counts()
-    lows_vc = Series(lows_lower).value_counts()
+highs_lower = [word.lower() for word in review_highs if word.isalpha()]
+lows_lower = [word.lower() for word in review_lows if word.isalpha()]
 
 
-    highs_clean = [word for word in highs_vc.index if word not in stopwords.words("english")]
-    lows_clean = [word for word in lows_vc.index if word not in stopwords.words("english")]
+highs_vc = Series(highs_lower).value_counts()
+lows_vc = Series(lows_lower).value_counts()
 
 
-    tag_high50 = pos_tag(highs_clean[:50])
-    tag_low50 = pos_tag(lows_clean[:50])
+highs_clean = [word for word in highs_vc.index if word not in stopwords.words("english")]
+lows_clean = [word for word in lows_vc.index if word not in stopwords.words("english")]
 
 
-    high_attributes = [word for word, tag in tag_high50 if tag.startswith("NN")]
-    low_attributes = [word for word, tag in tag_low50 if tag.startswith("NN")]
+tag_high50 = pos_tag(highs_clean[:50])
+tag_low50 = pos_tag(lows_clean[:50])
 
 
-    high_attributes[:5]
+high_attributes = [word for word, tag in tag_high50 if tag.startswith("NN")]
+low_attributes = [word for word, tag in tag_low50 if tag.startswith("NN")]
 
+
+high_attributes[:5]
+```
 
 
 
@@ -503,9 +515,9 @@ Below we find the top 5 attributes/nouns associated with restaurants with high a
 
 
 
-
-    low_attributes[:5]
-
+```python
+low_attributes[:5]
+```
 
 
 
@@ -513,41 +525,41 @@ Below we find the top 5 attributes/nouns associated with restaurants with high a
 
 
 
+```python
+stop_vectorizer = \
+TfidfVectorizer(min_df=0, smooth_idf=True, strip_accents='unicode',\
+				norm='l2', stop_words="english")
 
-    stop_vectorizer = \
-    TfidfVectorizer(min_df=0, smooth_idf=True, strip_accents='unicode',\
-                    norm='l2', stop_words="english")
-    
-    stop_train_x = stop_vectorizer.fit_transform(train_x)
-    stop_test_x = stop_vectorizer.transform(test_x)
-    stop_nb_classifier = MultinomialNB().fit(stop_train_x, train_y)
+stop_train_x = stop_vectorizer.fit_transform(train_x)
+stop_test_x = stop_vectorizer.transform(test_x)
+stop_nb_classifier = MultinomialNB().fit(stop_train_x, train_y)
 
 
-    class0log = stop_nb_classifier.feature_log_prob_[0]
-    class1log = stop_nb_classifier.feature_log_prob_[1]
-    
-    class1log_exp = []
-    
-    for i in class1log:
-        class1log_exp.append(math.exp(i))
-    
-    class0log_exp = []
-    for j in class0log:
-        class0log_exp.append(math.exp(j))
-    
-    ratio = []
-    for index, var in enumerate(class1log_exp):
-        ratio.append(class0log_exp[index]/var)
-    
-    vocabulary = np.array([t for t, i in sorted(stop_vectorizer.vocabulary_.iteritems(), key=itemgetter(1))])
-    
-    bottom5 = np.argsort(ratio)[:5]
-    print('Words most indicative of a high rating:')
-    print(" ".join(vocabulary[bottom5]))
-    top5 = np.argsort(ratio)[-5:]
-    print('\nWords most indicative of a low rating: ')
-    print(" ".join(vocabulary[top5]))
+class0log = stop_nb_classifier.feature_log_prob_[0]
+class1log = stop_nb_classifier.feature_log_prob_[1]
 
+class1log_exp = []
+
+for i in class1log:
+	class1log_exp.append(math.exp(i))
+
+class0log_exp = []
+for j in class0log:
+	class0log_exp.append(math.exp(j))
+
+ratio = []
+for index, var in enumerate(class1log_exp):
+	ratio.append(class0log_exp[index]/var)
+
+vocabulary = np.array([t for t, i in sorted(stop_vectorizer.vocabulary_.iteritems(), key=itemgetter(1))])
+
+bottom5 = np.argsort(ratio)[:5]
+print('Words most indicative of a high rating:')
+print(" ".join(vocabulary[bottom5]))
+top5 = np.argsort(ratio)[-5:]
+print('\nWords most indicative of a low rating: ')
+print(" ".join(vocabulary[top5]))
+```
     Words most indicative of a high rating:
     gem amazing perfect windsor fantastic
     
