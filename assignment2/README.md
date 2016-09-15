@@ -214,8 +214,9 @@ def text_classification():
 	print("\nTest:")
 	confusion_matrix(test_prediction, test_y)
 ```
-
+```python
 text_classification()
+```
 
     Train:
     Percent Correct
