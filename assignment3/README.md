@@ -471,30 +471,30 @@ def WordProcess(series):
  Now we are going to capture the models mentioned in each post and extract the words near the model mentioned
 
 ```python
-    # adding additional words to the products list, as sometimes people don't mention the exact model but the brand.
-    # Ex: "Sclass is no good. A8 is so much better. Mercedes is the worst." In this case Mercedes is referring to Sclass.
-    products = [element.lower() for element in products] #change product names to lower case
-    additional = ['lexusls','lexuses','lexusrx','jaguar','mercedes','benz','lexus','audi', 'bmw']
-    for i in additional:
-        products.append(i)
+# adding additional words to the products list, as sometimes people don't mention the exact model but the brand.
+# Ex: "Sclass is no good. A8 is so much better. Mercedes is the worst." In this case Mercedes is referring to Sclass.
+products = [element.lower() for element in products] #change product names to lower case
+additional = ['lexusls','lexuses','lexusrx','jaguar','mercedes','benz','lexus','audi', 'bmw']
+for i in additional:
+	products.append(i)
 
 
-    def product_mentioned(alist, productlist):
-        """Detects which products are mentioned in each review"""
-        model_list =[]
-        for i in alist:
-            if i in productlist:
-                model_list.append(i)
-        return model_list
+def product_mentioned(alist, productlist):
+	"""Detects which products are mentioned in each review"""
+	model_list =[]
+	for i in alist:
+		if i in productlist:
+			model_list.append(i)
+	return model_list
 
 
-    posts_processed = WordProcess(posts)
+posts_processed = WordProcess(posts)
 
 
-    mentioned = []
-    
-    for i in range(len(posts_processed)):
-        mentioned.append(product_mentioned(posts_processed[i], products))
+mentioned = []
+
+for i in range(len(posts_processed)):
+	mentioned.append(product_mentioned(posts_processed[i], products))
         
 # find the rows where no brand is mentioned, go into csv and investigate
 for i in range(len(mentioned)):

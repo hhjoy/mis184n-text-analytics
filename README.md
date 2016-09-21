@@ -4,3 +4,4 @@ MIS184N is a text analytics elective course for the Master's in Business Analyti
 Assignments:
 * [Assignment 1](https://github.com/juliaawu/mis184n-text-analytics/tree/master/assignment1)
 * [Assignment 2](https://github.com/juliaawu/mis184n-text-analytics/tree/master/assignment2)
+* [Assignment 3](https://github.com/juliaawu/mis184n-text-analytics/tree/master/assignment3)
