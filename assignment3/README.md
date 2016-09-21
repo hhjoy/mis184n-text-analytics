@@ -173,12 +173,12 @@ def addnodeDich_weighted(data,p1,p2, graph):
 	poscount = 0
 	for i in range(len(data)):
 		if data[p1].values[i] < data[p2].values[i]:
-			#p1 to p2
+			# p1 to p2
 			negval = data[p2].values[i] - data[p1].values[i]
 			neg += negval
 			negcount += 1
 		elif data[p1].values[i] > data[p2].values[i]:
-			#p2 to p1
+			# p2 to p1
 			posval = data[p1].values[i] - data[p2].values[i] 
 			pos += posval
 			poscount += 1
